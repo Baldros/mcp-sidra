@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SIDRA IBGE</title>
+    <style>
+      :root {
+        color: #15202b;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f7f8fa;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 14px;
+      }
+
+      main {
+        display: grid;
+        gap: 12px;
+        width: 100%;
+      }
+
+      header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 650;
+      }
+
+      a {
+        color: #0057b8;
+        font-size: 0.82rem;
+        text-decoration: none;
+      }
+
+      .summary {
+        margin: 0;
+        color: #4f5d6a;
+        font-size: 0.86rem;
+        line-height: 1.4;
+      }
+
+      .table-wrap {
+        width: 100%;
+        overflow: auto;
+        border: 1px solid #d8dee6;
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      table {
+        width: 100%;
+        min-width: 520px;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+      }
+
+      th,
+      td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #edf0f3;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #f2f5f8;
+        color: #344150;
+        font-weight: 650;
+        position: sticky;
+        top: 0;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      code {
+        overflow-wrap: anywhere;
+        color: #283747;
+        font-size: 0.78rem;
+      }
+
+      .empty {
+        padding: 20px;
+        color: #536170;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>SIDRA IBGE</h1>
+        <a id="source-link" href="https://sidra.ibge.gov.br" target="_blank" rel="noreferrer">Fonte</a>
+      </header>
+      <p id="summary" class="summary">Aguardando resultado da ferramenta.</p>
+      <section id="content" class="table-wrap">
+        <div class="empty">Os dados aparecerão aqui quando uma consulta for executada.</div>
+      </section>
+    </main>
+
+    <script type="module">
+      const summaryEl = document.querySelector("#summary");
+      const contentEl = document.querySelector("#content");
+      const linkEl = document.querySelector("#source-link");
+
+      const stringify = (value) => {
+        if (value === null || value === undefined) return "";
+        if (typeof value === "object") return JSON.stringify(value);
+        return String(value);
+      };
+
+      const pickRows = (payload) => {
+        if (Array.isArray(payload?.rows)) return payload.rows;
+        if (Array.isArray(payload?.items)) return payload.items;
+        if (Array.isArray(payload?.variables)) return payload.variables;
+        if (Array.isArray(payload?.classifications)) return payload.classifications;
+        return [];
+      };
+
+      const renderTable = (rows) => {
+        if (!rows.length) {
+          contentEl.innerHTML = '<div class="empty">Sem linhas para exibir.</div>';
+          return;
+        }
+
+        const flatRows = rows.slice(0, 50).map((row) => {
+          if (!row || typeof row !== "object" || Array.isArray(row)) {
+            return { value: row };
+          }
+          const dimensionText = Array.isArray(row.dimensions)
+            ? row.dimensions.map((dimension) => dimension.name).filter(Boolean).join(" | ")
+            : undefined;
+          return { ...row, dimensions: dimensionText };
+        });
+
+        const columns = [...new Set(flatRows.flatMap((row) => Object.keys(row)))].slice(0, 8);
+        const head = columns.map((column) => `<th>${column}</th>`).join("");
+        const body = flatRows
+          .map((row) => {
+            const cells = columns.map((column) => `<td>${stringify(row[column])}</td>`).join("");
+            return `<tr>${cells}</tr>`;
+          })
+          .join("");
+
+        contentEl.innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+      };
+
+      const render = (toolResult) => {
+        const payload = toolResult?.structuredContent ?? {};
+        const rows = pickRows(payload);
+        const count = payload.rowCount ?? payload.itemCount ?? payload.variableCount ?? rows.length;
+        const returned = payload.returnedRows ?? payload.returnedItems ?? rows.length;
+        const title = payload.title ? `${payload.title}. ` : "";
+        const truncated = payload.truncated ? " Resultado truncado." : "";
+
+        summaryEl.textContent = `${title}${returned} de ${count} itens exibidos.${truncated}`;
+        if (payload.requestUrl || payload.sourceUrls?.[0]) {
+          linkEl.href = payload.requestUrl ?? payload.sourceUrls[0];
+        }
+        renderTable(rows);
+      };
+
+      window.addEventListener(
+        "message",
+        (event) => {
+          if (event.source !== window.parent) return;
+          const message = event.data;
+          if (!message || message.jsonrpc !== "2.0") return;
+          if (message.method === "ui/notifications/tool-result") {
+            render(message.params);
+          }
+        },
+        { passive: true },
+      );
+
+      let rpcId = 0;
+      const initialize = async () => {
+        const id = ++rpcId;
+        window.parent.postMessage(
+          {
+            jsonrpc: "2.0",
+            id,
+            method: "ui/initialize",
+            params: {
+              appInfo: { name: "sidra-widget", version: "0.1.0" },
+              appCapabilities: {},
+              protocolVersion: "2026-01-26",
+            },
+          },
+          "*",
+        );
+        window.parent.postMessage(
+          { jsonrpc: "2.0", method: "ui/notifications/initialized", params: {} },
+          "*",
+        );
+      };
+
+      initialize();
+    </script>
+  </body>
+</html>
