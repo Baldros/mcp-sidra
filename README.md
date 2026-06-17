@@ -30,7 +30,7 @@ npm run dev
 O MCP fica disponível em:
 
 ```text
-http://localhost:8787/mcp
+http://localhost:8788/mcp
 ```
 
 Teste com o MCP Inspector:
@@ -44,7 +44,7 @@ npm run inspect
 Para conectar no ChatGPT durante desenvolvimento:
 
 1. Rode `npm run dev`.
-2. Exponha a porta com um túnel HTTPS, por exemplo `ngrok http 8787`.
+2. Exponha a porta com um túnel HTTPS, por exemplo `ngrok http 8788`.
 3. Em ChatGPT, ative developer mode e crie um app/conector apontando para `https://<subdomain>.ngrok.app/mcp`.
 
 Para submissão, defina `APP_DOMAIN` com o domínio HTTPS final do app. O widget é opcional, mas já existe um recurso Apps SDK simples para renderizar resultados tabulares.
