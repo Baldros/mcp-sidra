@@ -81,6 +81,18 @@ The MCP connector URL is:
 https://example.trycloudflare.com/mcp
 ```
 
+Ngrok alternative, if Cloudflare Tunnel is unavailable:
+
+```powershell
+ngrok http 8788
+```
+
+Then use the HTTPS forwarding URL shown by ngrok:
+
+```text
+https://<ngrok-host>/mcp
+```
+
 ## Option B: run in background on Windows
 
 Start the MCP server:
@@ -140,21 +152,71 @@ npx @modelcontextprotocol/inspector@latest --server-url https://<tunnel-host>/mc
 
 ## Use in ChatGPT Developer Mode
 
-1. Enable Developer Mode in ChatGPT.
-2. Create a connector/app from a remote MCP server.
-3. Use this URL:
+1. In ChatGPT, open Settings -> Apps & Connectors -> Advanced settings.
+2. Enable Developer Mode if your organization allows it.
+3. Create a connector/app from a remote MCP server.
+   Current ChatGPT docs show this under Settings -> Connectors -> Create.
+4. Enter connector metadata:
+   - Connector name: `MCP SIDRA`
+   - Description: `Consulta dados publicos do IBGE/SIDRA.`
+   - Connector URL:
 
 ```text
 https://<tunnel-host>/mcp
 ```
 
-4. For local validation, use no auth unless the server has been changed to
+5. Use no auth for local validation unless this server has been changed to
    require auth.
+6. After creating it, ChatGPT should show the tools advertised by the server.
+   Start a new chat and add the connector from the tools list.
+
+If the connector cannot be created, re-run the public root check and MCP
+Inspector command above while the tunnel is still running.
+
+The public URL must point to `/mcp`, not just the tunnel origin.
+
+```text
+https://<tunnel-host>/mcp
+```
 
 Official OpenAI reference:
 
 ```text
 https://developers.openai.com/apps-sdk/deploy/connect-chatgpt
+```
+
+## Stop local processes
+
+If you started the processes in foreground terminals, press `Ctrl+C` in each
+terminal.
+
+If you started them in the background, stop the process IDs returned by
+`Start-Process`:
+
+```powershell
+Stop-Process -Id <mcp-process-id>
+Stop-Process -Id <cloudflared-process-id>
+```
+
+If you lost the MCP server process ID, find the process listening on `8788`:
+
+```powershell
+Get-NetTCPConnection -LocalPort 8788 |
+  Select-Object LocalAddress, LocalPort, State, OwningProcess
+```
+
+Then stop only that process:
+
+```powershell
+Stop-Process -Id <owning-process-id>
+```
+
+If you lost the Cloudflare Tunnel process ID, list `cloudflared` processes and
+stop the one for this tunnel:
+
+```powershell
+Get-Process cloudflared | Select-Object Id, ProcessName, StartTime, Path
+Stop-Process -Id <cloudflared-process-id>
 ```
 
 ## Later provider deployment
