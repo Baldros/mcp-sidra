@@ -12,7 +12,7 @@
     "inspect": "npx @modelcontextprotocol/inspector@latest --server-url http://localhost:8788/mcp --transport http"
   },
   "dependencies": {
-    "@modelcontextprotocol/ext-apps": "^1.0.1",
+    "@modelcontextprotocol/ext-apps": "^1.7.5",
     "@modelcontextprotocol/sdk": "^1.20.2",
     "zod": "^4.4.3"
   },
