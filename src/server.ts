@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
-import { join } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import {
@@ -29,7 +28,7 @@ import { fetchKnowledgeDocument, searchKnowledge } from "./sidra/knowledge.js";
 import type { LocalitiesQuery } from "./sidra/types.js";
 
 const widgetHtml = readFileSync(
-  join(process.cwd(), "public", "sidra-widget.html"),
+  new URL("../public/sidra-widget.html", import.meta.url),
   "utf8",
 );
 
