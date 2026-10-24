@@ -37,10 +37,10 @@ const STATIC_DOCUMENTS: KnowledgeDocument[] = [
   {
     id: "sidra-descriptor",
     title: "SIDRA table descriptor endpoint",
-    url: `${SIDRA_BASE_URL}/DescritoresTabela/t/{table}`,
+    url: `${SIDRA_BASE_URL}/DescritoresTabela/t/1612`,
     text:
       "The SIDRA table descriptor endpoint returns table metadata including name, survey, subject, variables, periods, territorial levels, classifications, and categories. " +
-      "Use it before dynamically building /values queries so the model can choose valid dimensions.",
+      "Table 1612 is an example; use the requested table id before dynamically building /values queries so the model can choose valid dimensions.",
     metadata: { source: "IBGE SIDRA" },
   },
   {
