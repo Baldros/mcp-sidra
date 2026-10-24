@@ -16,7 +16,7 @@ tunnel restarts and should not be treated as a production endpoint.
 ## Prerequisites
 
 - Node.js `>=22`
-- Dependencies installed with `npm install`
+- Dependencies installed with `npm.cmd ci` on Windows
 - One HTTPS tunnel tool:
   - Cloudflare Tunnel: `cloudflared`
   - Or ngrok: `ngrok`
@@ -38,8 +38,8 @@ C:\Program Files (x86)\cloudflared\cloudflared.exe
 Terminal 1, start the MCP server:
 
 ```powershell
-cd E:\mcp-sidra
-npm run dev
+cd E:\MCPs\mcp-sidra
+npm.cmd run dev
 ```
 
 Confirm local HTTP is responding:
@@ -98,7 +98,7 @@ https://<ngrok-host>/mcp
 Start the MCP server:
 
 ```powershell
-$repo = "E:\mcp-sidra"
+$repo = "E:\MCPs\mcp-sidra"
 $env:PORT = "8788"
 Start-Process -FilePath "npm.cmd" `
   -ArgumentList "run","dev" `

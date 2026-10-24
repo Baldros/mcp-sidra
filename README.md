@@ -22,10 +22,18 @@ Todas as ferramentas são read-only.
 
 ## Desenvolvimento
 
-```bash
-npm install
-npm run dev
+No PowerShell, prepare e inicie este clone:
+
+```powershell
+cd E:\MCPs\mcp-sidra
+npm.cmd ci
+npm.cmd run build
+npm.cmd start
 ```
+
+Para desenvolvimento com recarga automática, use `npm.cmd run dev` no lugar de
+`npm.cmd start`. A porta padrão é `8788`; defina `PORT` no ambiente para alterá-la.
+Não é necessário criar um `.env` para o uso local.
 
 O MCP fica disponível em:
 
@@ -35,8 +43,8 @@ http://localhost:8788/mcp
 
 Teste com o MCP Inspector:
 
-```bash
-npm run inspect
+```powershell
+npm.cmd run inspect
 ```
 
 Para validar o MCP no ChatGPT usando um tunel HTTPS local, siga
@@ -46,7 +54,7 @@ Para validar o MCP no ChatGPT usando um tunel HTTPS local, siga
 
 Para conectar no ChatGPT durante desenvolvimento:
 
-1. Rode `npm run dev`.
+1. Rode `npm.cmd run dev`.
 2. Exponha a porta com um túnel HTTPS, por exemplo `ngrok http 8788`.
 3. Em ChatGPT, ative developer mode e crie um app/conector apontando para `https://<subdomain>.ngrok.app/mcp`.
 
