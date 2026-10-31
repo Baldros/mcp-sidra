@@ -31,6 +31,18 @@ describe("buildSidraValuesUrl", () => {
 });
 
 describe("parseSidraNumericValue", () => {
+  it.each([
+    ["0.16", 0.16],
+    ["-0.32", -0.32],
+    ["7633.2300000000000", 7633.23],
+    ["2900805", 2900805],
+  ])("parses the API's dot-decimal value %s", (text, expected) => {
+    expect(parseSidraNumericValue(text)).toEqual({
+      numericValue: expected,
+      valueStatus: null,
+    });
+  });
+
   it("parses Brazilian decimal values", () => {
     expect(parseSidraNumericValue("1.234,56")).toEqual({
       numericValue: 1234.56,

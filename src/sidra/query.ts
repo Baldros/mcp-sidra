@@ -115,7 +115,10 @@ export function parseSidraNumericValue(value: unknown): {
     return { numericValue: null, valueStatus: SPECIAL_VALUE_STATUSES[text] };
   }
 
-  const normalized = text.replace(/\./g, "").replace(",", ".");
+  // The SIDRA API returns "7633.23"; only a comma marks Brazilian "1.234,56".
+  const normalized = text.includes(",")
+    ? text.replace(/\./g, "").replace(",", ".")
+    : text;
   const numericValue = Number(normalized);
   if (Number.isFinite(numericValue)) {
     return { numericValue, valueStatus: null };
